@@ -1,3 +1,6 @@
+# This program adds a new strategy called LongRetaliator to the existing strategies
+# The LongRetaliator strategy is a modified version of the Retaliator strategy where the player retaliates if the opponent has been dangerous in any of the last two moves
+
 import random
 from statistics import mean
 
@@ -47,7 +50,6 @@ class Bully(Strategy):
         self.first_move = True
         self.d_streak = 0
     def choose_move(self, my_history, opp_history):
-        # Try adjusting Bully's logic to match original outcomes more closely
         if self.first_move:
             self.first_move = False
             return 'D'
@@ -102,6 +104,22 @@ class ProberRetaliator(Strategy):
                 else:
                     self.state = 'C'
         return self.state
+    
+# Add the new LongRetaliator strategy
+class LongRetaliator(Strategy):
+    def __init__(self):
+        self.reset()
+    def reset(self):
+        self.move_count = 0
+    def choose_move(self, my_history, opp_history):
+        self.move_count += 1
+        if self.move_count > MAX_MOVES:
+            return 'R'
+        # If the opponent has been dangerous in any of the last two moves, retaliate now
+        if len(opp_history) >= 2 and ('D' in opp_history[-2:]):
+            return 'D'
+        # Else cooperate
+        return 'C'
 
 def play_contest(strategyA, strategyB):
     strategyA.reset()
@@ -156,8 +174,9 @@ def average_payoff(strategyA_class, strategyB_class, contests=CONTESTS_PER_MATCH
     return mean(A_payoffs)
 
 if __name__ == "__main__":
-    strategies = [Mouse, Hawk, Bully, Retaliator, ProberRetaliator]
-    strategy_names = ["Mouse", "Hawk", "Bully", "Retaliator", "Prober-Retaliator"]
+    # Add LongRetaliator to the strategy pool
+    strategies = [Mouse, Hawk, Bully, Retaliator, ProberRetaliator, LongRetaliator]
+    strategy_names = ["Mouse", "Hawk", "Bully", "Retaliator", "Prober-Retaliator", "Long-Retaliator"]
 
     payoff_matrix = []
     for row_strat in strategies:
